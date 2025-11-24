@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using NUnit.Framework.Constraints;
 using Unity.VisualScripting;
 using UnityEngine;
+using TMPro;
 
 public enum StatusOfActionButton
 {
@@ -16,18 +17,13 @@ public class Player : MonoBehaviour
 {
     [SerializeField] private Inventory inventory;
     [SerializeField] private Joystick joystick;
+
+    private Resource SelectedResource = null;
+    [SerializeField] private GameObject ButtonPickUpResource;
     [SerializeField] private float speed;
     private Vector2 moveInput;
-    private GameObject player;
-    private List<Resource> objectsInContact = new List<Resource>();
-    private ResourceType resourceTypeOfBeingTouched = ResourceType.None;
-
-    public event EventHandler PlayerDroppedItemFromInventory;
-    public event EventHandler PlayerPickedUpItemToInventory;
-
-    private void Start()
-    {
-    }
+    // public event EventHandler PlayerDroppedItemFromInventory;
+    // public event EventHandler PlayerPickedUpItemToInventory;
 
     private void FixedUpdate()
     {
@@ -36,50 +32,38 @@ public class Player : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if( other.tag == "Resource" )
+        if (other.tag == "Resource")
         {
             Resource resource = other.GetComponent<Resource>();
-            resourceTypeOfBeingTouched = resource.nameResource;
-            objectsInContact.Add(resource);
+            ButtonPickUpResource.SetActive(true);
+            if (SelectedResource != resource)
+            {
+                SelectedResource = resource;
+            }
         }
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if( other.tag == "Resource" )
+        if (other.tag == "Resource")
         {
+            ButtonPickUpResource.SetActive(false);
             Resource resource = other.GetComponent<Resource>();
-            objectsInContact.Remove(resource);
+
+            SelectedResource = null;
         }
     }
 
-    public void ProcessTheActionButtonClick()
+    public void PickUpItem()
     {
-        if( inventory.isInventoryEmpty() && objectsInContact.Count > 0 )
-        {
-            resourceTypeOfBeingTouched = objectsInContact[0].nameResource;
-            inventory.PickUpItem( resourceTypeOfBeingTouched );
-            objectsInContact[0].DestroyYourself();
-        }
-        else if( inventory.isInventoryEmpty() && objectsInContact.Count == 0 )
-        {
-            return;
-        }
-        else if( inventory.isInventoryEmpty() == false )
-        {
-            inventory.DropItem();
-        }
+        inventory.AddResource(SelectedResource.nameResource);
+        SelectedResource.DestroyYourself();
+        SelectedResource = null;
     }
-    
-    public void DropAnItemFromInventory()
-    {
-        PlayerDroppedItemFromInventory?.Invoke(this, EventArgs.Empty);
-    }
-
-    public void PickedUpAnItemToInventory()
-    {
-        PlayerPickedUpItemToInventory?.Invoke(this, EventArgs.Empty);
-    }
+    // public void PickedUpAnItemToInventory()
+    // {
+    //     PlayerPickedUpItemToInventory?.Invoke(this, EventArgs.Empty);
+    // }
 }
 
 

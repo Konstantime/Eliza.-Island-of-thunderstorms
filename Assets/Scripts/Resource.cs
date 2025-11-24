@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Resource : MonoBehaviour
 {
-    public ResourceType nameResource;
+    public ResourcesType nameResource;
     public void DestroyYourself()
     {
         Destroy(gameObject);
