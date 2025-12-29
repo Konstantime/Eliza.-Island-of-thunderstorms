@@ -3,16 +3,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class Watch : MonoBehaviour
 {
     [SerializeField] private (int hours, int minutes) time = (9,0);
+    [SerializeField] private GameManager gameManager;
     private (int hours, int minutes) modifiedTimeForPreviewMode = (0, 0);
     [SerializeField] private Text text;
     private bool isWatchInPreviewMode = false;
+    private int currentDay = 0;
+    
+    public UnityEvent OnMinuteAdded;
+
+
     private void Start()
     {
-        StartCoroutine(IncreaseTimeByMinute( 10 ));
+        StartCoroutine(IncreaseTimeByMinute( 1 ));
+        currentDay = gameManager.GetCurrentday();
         UpdateWatch();
     }
 
@@ -25,10 +33,13 @@ public class Watch : MonoBehaviour
         }
     }
 
-    public void AddMinutes( int minutes )
+    public void AddMinutes(int minutes)
     {
-        time = ReturnTimeWithAdditionMinutes( time, minutes);
+        time = ReturnTimeWithAdditionMinutes(time, minutes);
         modifiedTimeForPreviewMode = ReturnTimeWithAdditionMinutes(modifiedTimeForPreviewMode, minutes);
+        
+        OnMinuteAdded?.Invoke();
+        
         UpdateWatch();
     }
 
@@ -44,7 +55,7 @@ public class Watch : MonoBehaviour
             output = ReturnTimeConvertedInTheCorrectFormat( time);
             modifiedTimeForPreviewMode = time;
         }
-        text.text = output;
+        text.text = "Day: " + Convert.ToString(currentDay) + "\n" + output;
     }
     public void UpdateModifiedTimeForPreviewMode( int addedMinutes )
     {
@@ -55,7 +66,7 @@ public class Watch : MonoBehaviour
     public void SetModifiedTime()
     {
         isWatchInPreviewMode = false;
-        text.text = ReturnTimeConvertedInTheCorrectFormat( modifiedTimeForPreviewMode );
+        text.text = "Day: " + Convert.ToString(currentDay) + "\n" + ReturnTimeConvertedInTheCorrectFormat( modifiedTimeForPreviewMode );
         time = modifiedTimeForPreviewMode;
     }
     private (int, int) ReturnTimeWithAdditionMinutes( (int hours, int minutes) startTime, int minutes )

@@ -1,0 +1,5 @@
+C:/Users/Kostya/Unity Projects/Eliza.-Island-of-thunderstorms/.utmp/RelWithDebInfo/3i4r1uo7/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/Kostya/Unity Projects/Eliza.-Island-of-thunderstorms/.utmp/RelWithDebInfo/3i4r1uo7/armeabi-v7a/CMakeFiles/rebuild_cache.dir
+C:/Users/Kostya/Unity Projects/Eliza.-Island-of-thunderstorms/.utmp/RelWithDebInfo/3i4r1uo7/armeabi-v7a/FramePacing/CMakeFiles/swappywrapper.dir
+C:/Users/Kostya/Unity Projects/Eliza.-Island-of-thunderstorms/.utmp/RelWithDebInfo/3i4r1uo7/armeabi-v7a/FramePacing/CMakeFiles/edit_cache.dir
+C:/Users/Kostya/Unity Projects/Eliza.-Island-of-thunderstorms/.utmp/RelWithDebInfo/3i4r1uo7/armeabi-v7a/FramePacing/CMakeFiles/rebuild_cache.dir

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
+using System.Linq;
 
 public enum ToolsType
 {
@@ -8,14 +10,14 @@ public enum ToolsType
     Axe,
     Hoe,
     Jug,
-    FishingRod,
-    CrabTrap
+    FishingRod
 }
 
 public enum FoodType {
     RawFish,
     CookedFish,
-    CookedCrab
+    Crab,
+    Water
 }
 
 public enum ResourcesType {
@@ -31,75 +33,119 @@ public enum ResourcesType {
 
 public class Inventory : MonoBehaviour
 {
-    private Dictionary<ToolsType, int> tools = new Dictionary<ToolsType, int>()
+    private Dictionary<ToolsType, int> availableTools = new Dictionary<ToolsType, int>()
     {
         { ToolsType.Knife, 0},
-        { ToolsType.Axe, 0},
+        { ToolsType.Axe, 10},
         { ToolsType.Hoe, 0},
         { ToolsType.Jug, 0},
-        { ToolsType.FishingRod, 0},
-        { ToolsType.CrabTrap, 0}
+        { ToolsType.FishingRod, 0}
     };
 
-    private Dictionary<FoodType, int> food = new Dictionary<FoodType, int>()
+    private Dictionary<FoodType, int> availableFood = new Dictionary<FoodType, int>()
     {
         { FoodType.RawFish, 0},
-        { FoodType.CookedFish, 0},
-        { FoodType.CookedCrab, 0},
+        { FoodType.CookedFish, 10},
+        { FoodType.Crab, 0},
+        { FoodType.Water, 0}
     };
 
-    private Dictionary<ResourcesType, int> resources = new Dictionary<ResourcesType, int>()
+    private Dictionary<ResourcesType, int> availableResources = new Dictionary<ResourcesType, int>()
     {
         { ResourcesType.Stick , 0},
         { ResourcesType.Stone , 0},
-        { ResourcesType.PalmLeaf , 0},
-        { ResourcesType.Algae, 0},
+        { ResourcesType.PalmLeaf , 90},
+        { ResourcesType.Algae, 20},
         { ResourcesType.SharkTooth, 0},
         { ResourcesType.Clay, 0},
-        { ResourcesType.WoodBoard, 0}
+        { ResourcesType.WoodBoard, 40}
     };
 
     [SerializeField] private List<InventoryResourceButton> resourceButtons;
+
+    
+    [SerializeField] private List<InventoryFoodButton> foodButtons;
+    [SerializeField] private List<InventoryToolButton> toolButtons;
     public void AddResource(ResourcesType resource)
     {
         switch (resource)
         {
             case ResourcesType.Stone:
-                resources[ResourcesType.Stone] += 1;
+                availableResources[ResourcesType.Stone] += 1;
                 break;
             case ResourcesType.Stick:
-                resources[ResourcesType.Stick] += 1;
+                availableResources[ResourcesType.Stick] += 1;
                 break;
             case ResourcesType.PalmLeaf:
-                resources[ResourcesType.PalmLeaf] += 1;
+                availableResources[ResourcesType.PalmLeaf] += 1;
                 break;
             case ResourcesType.Algae:
-                resources[ResourcesType.Algae] += 1;
+                availableResources[ResourcesType.Algae] += 1;
                 break;
             case ResourcesType.SharkTooth:
-                resources[ResourcesType.SharkTooth] += 1;
+                availableResources[ResourcesType.SharkTooth] += 1;
                 break;
             case ResourcesType.Clay:
-                resources[ResourcesType.Clay] += 1;
+                availableResources[ResourcesType.Clay] += 1;
                 break;
             case ResourcesType.WoodBoard:
-                resources[ResourcesType.WoodBoard] += 1;
+                availableResources[ResourcesType.WoodBoard] += 1;
                 break;
             default:
                 Debug.LogWarning("Не правильный ресурс");
                 break;
         }
+    }
 
-        Debug.Log( resources[ResourcesType.Stick] );
-        Debug.Log( resources[ResourcesType.Stone] );
+    private void Start()
+    {
+        Hut hut = FindObjectOfType<Hut>();
+        if (hut != null)
+        {
+            hut.onNewDay.AddListener(HandleNewDay);
+        }
+    }
+    private void HandleNewDay()
+    {
+        ThrowOffAllAvailableResourcesToolsFoods();
+    }
+
+    private void ThrowOffAllAvailableResourcesToolsFoods()
+    {
+        // foreach (var key in availableResources.Keys)
+        // {
+        //     availableResources[key] = 0;
+        // }
+        // foreach (var key in availableFood.Keys)
+        // {
+        //     availableFood[key] = 0;
+        // }
+        // foreach (var key in availableTools.Keys)
+        // {
+        //     availableTools[key] = 0;
+        // }
+
+        foreach (var key in availableResources.Keys.ToList())
+        {
+            availableResources[key] = 0;
+        }
+        foreach (var key in availableFood.Keys.ToList())
+        {
+            availableFood[key] = 0;
+        }
+        foreach (var key in availableTools.Keys.ToList())
+        {
+            availableTools[key] = 0;
+        }
+
+
     }
 
     public int GetCountResourcesByType(ResourcesType resourcesType) {
-        Debug.Log( resourcesType + " " + resources[resourcesType]);
-        return resources[resourcesType];
+        return availableResources[resourcesType];
     }
 
-    public void UpdateAllInventoryButton()
+    public void UpdateAllInventoryResourceButton()
     {
         for (int i = 0; i < resourceButtons.Count; i++)
         {
@@ -107,67 +153,51 @@ public class Inventory : MonoBehaviour
         }
     }
 
+    public int GetCountFoodByType( FoodType foodType)
+    {
+        return availableFood[foodType];
+    }
 
+    public void SpendResourceByType( ResourcesType resourcesType, int count){
+        availableResources[resourcesType] -= count;
+    }
 
-    // [SerializeField] Sprite[] spritesResources;
-    // [SerializeField] Dictionary<ResourceType, GameObject> resources; // = new Dictionary<ResourceType, GameObject>()
-    // [SerializeField] Sprite[] spritesBuildings;
+    public void AddTool( ToolsType toolsType, int count){
+        availableTools[toolsType] += count;
 
+        UpdateFoodBottons();
+        UpdateToolBottons();
+        UpdateAllInventoryResourceButton();
+    }
 
-    // [SerializeField] SpriteRenderer spriteRenderer;
-    // [SerializeField] GameObject[] resources;
-    // private GameObject item;
-    // private Player player;
-    // private void Start()
-    // {
-    //     player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
-    //     player.PlayerDroppedItemFromInventory += Inventory_OnItemDropped;
-    //     player.PlayerPickedUpItemToInventory += Inventory_OnItemPickedUpItem;
-    // }
+    public int GetCountToolByType( ToolsType toolType)
+    {
+        return availableTools[toolType];
+    }
 
-    // private void FixedUpdate()
-    // {
-    //     if (item != null)
-    //     {
-    //         item.transform.position = transform.position;
-    //     }
-    // }
+    public void UpdateFoodBottons()
+    {
+        for (int i = 0; i < foodButtons.Count; i++)
+        {
+            foodButtons[i].UpdateCount();
+        }
+    }
+    
+    public void UpdateToolBottons()
+    {
+        for (int i = 0; i < toolButtons.Count; i++)
+        {
+            toolButtons[i].UpdateTextCount();
+        }
+    }
 
-    // public void PlayerRaisedResource( Resources resources )
-    // {}
+    public void AddFood( FoodType food, int count )
+    {
+        availableFood[ food ] += count;
+    }
 
-    // private void Inventory_OnItemDropped(object sender, EventArgs e)
-    // {
-    //     Debug.Log("Инвентарь знает о событии бросания предмета" + sender);
-    // }
-    // private void Inventory_OnItemPickedUpItem(object sender, EventArgs e)
-    // {
-    //     Debug.Log("инвентарь поднял предмет");
-    // }
-    // public void DropItem()
-    // {
-    //     item = null;
-    // }
-    // public void PickUpItem( ResourceType iteml )
-    // {
-    //     switch (iteml)
-    //     {
-    //         case ResourceType.Stick:
-    //             item = Instantiate(resources[0], new Vector3( transform.position.x, transform.position.y, transform.position.z ), Quaternion.identity );
-    //             break;
-    //         case ResourceType.Stone:
-    //             item = Instantiate(resources[1], new Vector3( transform.position.x, transform.position.y, transform.position.z ), Quaternion.identity );
-    //             break;
-    //         case ResourceType.Obsidian:
-    //             item = Instantiate(resources[2], new Vector3( transform.position.x, transform.position.y, transform.position.z ), Quaternion.identity );
-    //             break;
-    //         case ResourceType.Branch:
-    //             item = Instantiate(resources[3], new Vector3( transform.position.x, transform.position.y, transform.position.z ), Quaternion.identity );
-    //             break;
-    //     }
-    // }
-    // public bool isInventoryEmpty()
-    // {
-    //     return item == null;
-    // }
+    public void SpendCountFoodByType( FoodType foodType, int count )
+    {
+        availableFood[foodType] -= count;
+    }
 }
